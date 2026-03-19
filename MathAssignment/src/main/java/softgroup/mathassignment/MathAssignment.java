@@ -35,8 +35,20 @@ public class MathAssignment
         
         System.out.print("\nInput public key recieved from confidant: ");
         BigInteger recievedKey = new BigInteger(sc.next());
-        sc.close();
         
         System.out.print("\nCipher key result: " + keyCalc.cipherKey(recievedKey));
+        
+        int shift = keyCalc.cipherKey(recievedKey).intValue();
+        sc.nextLine();
+        
+        System.out.print("\nInput message to encrypt: ");
+        String encryptMsg = sc.nextLine();
+        
+        String msg = Cipher.encrypt(encryptMsg, shift);
+        
+        System.out.println("Message encrypted:");
+        System.out.println(msg);
+        
+        sc.close();
     }
 }
