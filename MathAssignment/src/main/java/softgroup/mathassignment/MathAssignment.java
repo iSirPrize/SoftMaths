@@ -49,6 +49,17 @@ public class MathAssignment
         System.out.println("Message encrypted:");
         System.out.println(msg);
         
+
+
+        System.out.print("\nInput encrypted message received from the other user: ");
+        String receivedEncryptedMsg = sc.nextLine();
+
+        String decryptedReceivedMsg = Decrypt.decrypt(receivedEncryptedMsg, shift);
+
+        System.out.println("Decrypted message from other user:");
+        System.out.println(decryptedReceivedMsg);
+
         sc.close();
     }
+
 }
