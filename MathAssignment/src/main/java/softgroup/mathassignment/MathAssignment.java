@@ -17,8 +17,152 @@ public class MathAssignment
     public static void main(String[] args) 
     {
         Scanner sc = new Scanner(System.in);
+        int mode = 0;
+        int shift = 0;
+        boolean running = true;
+        Calculation keyCalc = null;
         
-        System.out.print("Public p: ");
+        while(running)
+        {
+            System.out.print("Welcome to Pacific Secure Networks Ltd Encryption Service");
+            System.out.print("\n\nPlease select a service:");
+            System.out.println("\n1: Generate Public Key\n2: Generate Shared private Key (User must have generated public key)\n3: Encrypt Communication\n4: Decrypt Communication\n5: Exit");
+            String choice = sc.nextLine().trim();
+        
+            switch(choice)
+            {
+                case "1":
+                    keyCalc = publicKey(sc);
+                    break;
+                
+                case "2":
+                    if(keyCalc == null)
+                    {
+                        while(true)
+                        {   
+                            System.out.println("No active keys found\nWould you like to generate key (y/n)");
+                            String check = sc.nextLine().trim().toLowerCase();
+                        
+                            if(check.equals("y"))
+                            {
+                                keyCalc = publicKey(sc);
+                                break;
+                            }
+                            else if(check.equals("n"))
+                            {
+                                System.out.println("Returning to menu\n");
+                                break;
+                            }
+                            else
+                            {
+                                System.out.println("Please input 'y' or 'n'");
+                            }
+                        }                        
+                    }
+                    
+                    if(keyCalc != null)
+                    {
+                        shift = genSharedPrivKey(sc, keyCalc);
+                        System.out.println("shift is:" +shift);
+                    }                    
+                    break;
+                    
+                case "3":                    
+                    if(shift == 0)
+                    {
+                        while(true)
+                        {
+                            System.out.println("User Shared Private Key not found\nWould you like to input key manually (y/n)");
+                            String check = sc.nextLine().trim().toLowerCase();
+                            
+                            if(check.equals("y"))
+                            {
+                                System.out.println("Please input Shared Private Key");
+                                String userPrivKey = sc.nextLine().trim();
+                                
+                                try
+                                {
+                                    shift = Integer.parseInt(userPrivKey);
+                                    System.out.println("Private key\n" + shift + "\naccepted");
+                                    break;
+                                }catch(NumberFormatException e)
+                                {
+                                    System.out.println("Invalid input. Please enter integer key");
+                                }
+                            }
+                            else if(check.equals("n"))
+                            {
+                                System.out.println("Returning to menu\n");
+                                break;
+                            }
+                            else
+                            {
+                                System.out.println("Please input 'y' or 'n'");
+                            }
+                        }
+                    }                    
+                    if(shift != 0)
+                    {
+                        encryptComs(sc, shift);
+                    }
+                    break;
+                    
+                case "4":
+                    if(shift == 0)
+                    {
+                        while(true)
+                        {
+                            System.out.println("User Shared Private Key not found\nWould you like to input key manually (y/n)");
+                            String check = sc.nextLine().trim().toLowerCase();
+                            
+                            if(check.equals("y"))
+                            {
+                                System.out.println("Please input Shared Private Key");
+                                String userPrivKey = sc.nextLine().trim();
+                                
+                                try
+                                {
+                                    shift = Integer.parseInt(userPrivKey);
+                                    System.out.println("Private key\n" + shift + "\naccepted");
+                                    break;
+                                }catch(NumberFormatException e)
+                                {
+                                    System.out.println("Invalid input. Please enter integer key");
+                                }
+                            }
+                            else if(check.equals("n"))
+                            {
+                                System.out.println("Returning to menu\n");
+                            }
+                            else
+                            {
+                                System.out.println("Please input 'y' or 'n'");
+                            }
+                        }                        
+                    }
+                    if(shift != 0)
+                    {
+                        decryptComs(sc, shift);
+                    }
+                    break;
+                
+                case "5":
+                    running = false;
+                    System.out.println("\n Thanks for using PSNL Encryption Service");
+                    break;
+                    
+                default:
+                    System.out.println("Please input valid response 1-5");
+                    break;              
+            }
+        }
+
+        sc.close();
+    }    
+    
+    public static Calculation publicKey(Scanner sc)
+    {
+         System.out.print("Public p: ");
         BigInteger p = new BigInteger(sc.next());
         
         System.out.print("\nPublic g: ");
@@ -26,21 +170,34 @@ public class MathAssignment
         
         System.out.print("\nIntput personal key: ");
         BigInteger personalKey = new BigInteger(sc.next());
-        Calculation keyCalc = new Calculation(p, g, personalKey);
+        Calculation key = new Calculation(p, g, personalKey);
         
         //get public key to share with confidant
-        BigInteger shareKey = keyCalc.getPublicKey();
+        BigInteger shareKey = key.getPublicKey();
         
         System.out.print("\nPublic key is: " + shareKey);
+        System.out.println();
+        System.out.println();
+        sc.nextLine();
         
+        return key;
+    }
+    
+    public static int genSharedPrivKey(Scanner sc, Calculation key)
+    {
         System.out.print("\nInput public key recieved from confidant: ");
         BigInteger recievedKey = new BigInteger(sc.next());
         
-        System.out.print("\nCipher key result: " + keyCalc.cipherKey(recievedKey));
-        
-        int shift = keyCalc.cipherKey(recievedKey).intValue();
+        System.out.print("\nCipher key result: " + key.cipherKey(recievedKey));
+        System.out.println();
+        System.out.println();
         sc.nextLine();
         
+        return key.cipherKey(recievedKey).intValue();
+    }
+    
+    public static void encryptComs(Scanner sc, int shift)
+    {
         System.out.print("\nInput message to encrypt: ");
         String encryptMsg = sc.nextLine();
         
@@ -48,18 +205,21 @@ public class MathAssignment
         
         System.out.println("Message encrypted:");
         System.out.println(msg);
-        
-
-
-        System.out.print("\nInput encrypted message received from the other user: ");
+        System.out.println();
+        System.out.println();
+    }
+    
+    public static void decryptComs(Scanner sc, int shift)
+    {
+        System.out.print("\nInput message to decrypt: ");
         String receivedEncryptedMsg = sc.nextLine();
 
         String decryptedReceivedMsg = Decrypt.decrypt(receivedEncryptedMsg, shift);
 
-        System.out.println("Decrypted message from other user:");
+        System.out.println("Message decrypted:");
         System.out.println(decryptedReceivedMsg);
-
-        sc.close();
+        System.out.println();
+        System.out.println();
     }
 
 }
