@@ -18,7 +18,7 @@ public class MathAssignment
     {
         Scanner sc = new Scanner(System.in);
         int mode = 0;
-        int shift = 0;
+        String sharedKeyStr = "";
         boolean running = true;
         Calculation keyCalc = null;
         
@@ -62,13 +62,13 @@ public class MathAssignment
                     
                     if(keyCalc != null)
                     {
-                        shift = genSharedPrivKey(sc, keyCalc);
-                        System.out.println("shift is:" +shift);
+                        sharedKeyStr = genSharedPrivKey(sc, keyCalc);
+                        System.out.println("cipher key: " + sharedKeyStr);
                     }                    
                     break;
                     
                 case "3":                    
-                    if(shift == 0)
+                    if(sharedKeyStr.isEmpty())
                     {
                         while(true)
                         {
@@ -82,8 +82,9 @@ public class MathAssignment
                                 
                                 try
                                 {
-                                    shift = Integer.parseInt(userPrivKey);
-                                    System.out.println("Private key\n" + shift + "\naccepted");
+                                    new BigInteger(userPrivKey);
+                                    sharedKeyStr = userPrivKey;
+                                    System.out.println("Private key\n" + sharedKeyStr + "\naccepted");
                                     break;
                                 }catch(NumberFormatException e)
                                 {
@@ -101,14 +102,14 @@ public class MathAssignment
                             }
                         }
                     }                    
-                    if(shift != 0)
+                    if(!sharedKeyStr.isEmpty())
                     {
-                        encryptComs(sc, shift);
+                        encryptComs(sc, sharedKeyStr);
                     }
                     break;
                     
                 case "4":
-                    if(shift == 0)
+                    if(sharedKeyStr.isEmpty())
                     {
                         while(true)
                         {
@@ -122,8 +123,9 @@ public class MathAssignment
                                 
                                 try
                                 {
-                                    shift = Integer.parseInt(userPrivKey);
-                                    System.out.println("Private key\n" + shift + "\naccepted");
+                                    new BigInteger(userPrivKey);
+                                    sharedKeyStr = userPrivKey;
+                                    System.out.println("Private key\n" + sharedKeyStr + "\naccepted");
                                     break;
                                 }catch(NumberFormatException e)
                                 {
@@ -140,9 +142,9 @@ public class MathAssignment
                             }
                         }                        
                     }
-                    if(shift != 0)
+                    if(!sharedKeyStr.isEmpty())
                     {
-                        decryptComs(sc, shift);
+                        decryptComs(sc, sharedKeyStr);
                     }
                     break;
                 
@@ -183,43 +185,44 @@ public class MathAssignment
         return key;
     }
     
-    public static int genSharedPrivKey(Scanner sc, Calculation key)
+    public static String genSharedPrivKey(Scanner sc, Calculation key)
     {
         System.out.print("\nInput public key recieved from confidant: ");
         BigInteger recievedKey = new BigInteger(sc.next());
         
-        System.out.print("\nCipher key result: " + key.cipherKey(recievedKey));
+        BigInteger fullSharedKey = key.cipherKey(recievedKey);
+        System.out.print("\nShared Private Key: " + fullSharedKey);
         System.out.println();
         System.out.println();
         sc.nextLine();
         
-        return key.cipherKey(recievedKey).intValue();
+        // Return the key with base26 shift
+        return fullSharedKey.toString();
     }
     
-    public static void encryptComs(Scanner sc, int shift)
+    public static void encryptComs(Scanner sc, String sharedKeyStr)
     {
         System.out.print("\nInput message to encrypt: ");
         String encryptMsg = sc.nextLine();
         
-        String msg = Cipher.encrypt(encryptMsg, shift);
+        String msg = Cipher.encrypt(encryptMsg, sharedKeyStr);
         
-        System.out.println("Message encrypted:");
+        System.out.println("Message encrypted: ");
         System.out.println(msg);
         System.out.println();
         System.out.println();
     }
     
-    public static void decryptComs(Scanner sc, int shift)
+    public static void decryptComs(Scanner sc, String sharedKeyStr)
     {
         System.out.print("\nInput message to decrypt: ");
         String receivedEncryptedMsg = sc.nextLine();
 
-        String decryptedReceivedMsg = Decrypt.decrypt(receivedEncryptedMsg, shift);
+        String decryptedReceivedMsg = Decrypt.decrypt(receivedEncryptedMsg, sharedKeyStr);
 
-        System.out.println("Message decrypted:");
+        System.out.println("Message decrypted: ");
         System.out.println(decryptedReceivedMsg);
         System.out.println();
         System.out.println();
     }
-
 }

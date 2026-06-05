@@ -1,19 +1,36 @@
 package softgroup.mathassignment;
+
+/**
+ *
+ * @author Prize
+ */
+
 public class Decrypt
 {
-    public static String decrypt(String input, int key)
+    public static String decrypt(String input, String keyStr)
     {
         StringBuilder output = new StringBuilder();
 
-        key = (key % 26 + 26) % 26;
+        keyStr = keyStr.replaceAll("[^0-9]", "");
+        if (keyStr.isEmpty()) {
+            keyStr = "0";
+        }
 
-        for(char character : input.toCharArray())
+        int keyIndex = 0;
+        int keyLength = keyStr.length();
+
+        for (char character : input.toCharArray())
         {
-            if(Character.isLetter(character))
+            if (Character.isLetter(character))
             {
+                int shift = Character.getNumericValue(keyStr.charAt(keyIndex % keyLength));
+                
                 char base = Character.isUpperCase(character) ? 'A' : 'a';
-                char result = (char) ((character - base - key + 26) % 26 + base);
+                // Subtract the shift instead of adding it
+                char result = (char) ((character - base - shift + 26) % 26 + base);
                 output.append(result);
+                
+                keyIndex++;
             }
             else
             {
